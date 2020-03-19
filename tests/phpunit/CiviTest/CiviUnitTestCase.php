@@ -1064,8 +1064,8 @@ class CiviUnitTestCase extends PHPUnit\Framework\TestCase {
     $this->priceSetID = $this->ids['PriceSet'][] = $this->eventPriceSetCreate(55, 0, 'Radio', $options);
     CRM_Price_BAO_PriceSet::addTo('civicrm_event', $event['id'], $this->priceSetID);
     $priceSet = CRM_Price_BAO_PriceSet::getSetDetail($this->priceSetID, TRUE, FALSE);
-    $priceSet = CRM_Utils_Array::value($this->priceSetID, $priceSet);
-    $this->eventFeeBlock = CRM_Utils_Array::value('fields', $priceSet);
+    $priceSet = $priceSet[$this->priceSetID] ?? NULL;
+    $this->eventFeeBlock = $priceSet['fields'] ?? NULL;
     return $event;
   }
 
@@ -1841,6 +1841,8 @@ AND    ( TABLE_NAME LIKE 'civicrm_value_%' )
       'civicrm_participant',
       'civicrm_participant_payment',
       'civicrm_pledge',
+      'civicrm_pcp_block',
+      'civicrm_pcp',
       'civicrm_pledge_block',
       'civicrm_pledge_payment',
       'civicrm_price_set_entity',
@@ -1927,7 +1929,7 @@ VALUES
       else {
         $keys[CRM_Utils_Array::value('name', $settings, $field)] = CRM_Utils_Array::value('name', $settings, $field);
       }
-      $type = CRM_Utils_Array::value('type', $settings);
+      $type = $settings['type'] ?? NULL;
       if ($type == CRM_Utils_Type::T_DATE) {
         $dateFields[] = $settings['name'];
         // we should identify both real names & unique names as dates

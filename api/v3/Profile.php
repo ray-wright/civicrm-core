@@ -36,7 +36,7 @@
  * @throws API_Exception
  */
 function civicrm_api3_profile_get($params) {
-  $nonStandardLegacyBehaviour = is_numeric($params['profile_id']) ? TRUE : FALSE;
+  $nonStandardLegacyBehaviour = is_numeric($params['profile_id']);
   if (!empty($params['check_permissions']) && !empty($params['contact_id']) && !1 === civicrm_api3('contact', 'getcount', ['contact_id' => $params['contact_id'], 'check_permissions' => 1])) {
     throw new API_Exception('permission denied');
   }
@@ -296,7 +296,7 @@ function _civicrm_api3_profile_submit_spec(&$params, $apirequest) {
     //@todo get_options should take an array - @ the moment it is only takes 'all' - which is supported
     // by other getfields fn
     // we don't resolve state, country & county for performance reasons
-    $resolveOptions = CRM_Utils_Array::value('get_options', $apirequest['params']) == 'all' ? TRUE : FALSE;
+    $resolveOptions = ($apirequest['params']['get_options'] ?? NULL) == 'all';
     $profileID = _civicrm_api3_profile_getProfileID($apirequest['params']['profile_id']);
     $params = _civicrm_api3_buildprofile_submitfields($profileID, $resolveOptions, CRM_Utils_Array::value('cache_clear', $params));
   }
@@ -442,17 +442,17 @@ function _civicrm_api3_profile_getbillingpseudoprofile(&$params) {
 
   if (!empty($result['api.address.get.1']['count'])) {
     foreach ($addressFields as $fieldname) {
-      $values['billing_' . $fieldname . '-' . $locationTypeID] = isset($result['api.address.get.1']['values'][0][$fieldname]) ? $result['api.address.get.1']['values'][0][$fieldname] : '';
+      $values['billing_' . $fieldname . '-' . $locationTypeID] = $result['api.address.get.1']['values'][0][$fieldname] ?? '';
     }
   }
   elseif (!empty($result['api.address.get.2']['count'])) {
     foreach ($addressFields as $fieldname) {
-      $values['billing_' . $fieldname . '-' . $locationTypeID] = isset($result['api.address.get.2']['values'][0][$fieldname]) ? $result['api.address.get.2']['values'][0][$fieldname] : '';
+      $values['billing_' . $fieldname . '-' . $locationTypeID] = $result['api.address.get.2']['values'][0][$fieldname] ?? '';
     }
   }
   else {
     foreach ($addressFields as $fieldname) {
-      $values['billing_' . $fieldname . '-' . $locationTypeID] = isset($result[$fieldname]) ? $result[$fieldname] : '';
+      $values['billing_' . $fieldname . '-' . $locationTypeID] = $result[$fieldname] ?? '';
     }
   }
 

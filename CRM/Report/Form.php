@@ -614,7 +614,7 @@ class CRM_Report_Form extends CRM_Core_Form {
         CRM_Utils_System::civiExit();
       }
 
-      $formValues = CRM_Utils_Array::value('form_values', $this->_instanceValues);
+      $formValues = $this->_instanceValues['form_values'] ?? NULL;
       if ($formValues) {
         $this->_formValues = CRM_Utils_String::unserialize($formValues);
       }
@@ -756,7 +756,7 @@ class CRM_Report_Form extends CRM_Core_Form {
         if (!empty($table[$fieldGrp]) && is_array($table[$fieldGrp])) {
           foreach ($table[$fieldGrp] as $fieldName => $field) {
             // $name is the field name used to reference the BAO/DAO export fields array
-            $name = isset($field['name']) ? $field['name'] : $fieldName;
+            $name = $field['name'] ?? $fieldName;
 
             // Sometimes the field name key in the BAO/DAO export fields array is
             // different from the actual database field name.
@@ -790,8 +790,8 @@ class CRM_Report_Form extends CRM_Core_Form {
             }
 
             // set alias = table-name, unless already set
-            $alias = isset($field['alias']) ? $field['alias'] : (
-              isset($this->_columns[$tableName]['alias']) ? $this->_columns[$tableName]['alias'] : $tableName
+            $alias = $field['alias'] ?? (
+              $this->_columns[$tableName]['alias'] ?? $tableName
             );
             $this->_columns[$tableName][$fieldGrp][$fieldName]['alias'] = $alias;
 
@@ -947,8 +947,8 @@ class CRM_Report_Form extends CRM_Core_Form {
             if (CRM_Utils_Array::value('type', $field) & CRM_Utils_Type::T_DATE
             ) {
               if (is_array($field['default'])) {
-                $this->_defaults["{$fieldName}_from"] = CRM_Utils_Array::value('from', $field['default']);
-                $this->_defaults["{$fieldName}_to"] = CRM_Utils_Array::value('to', $field['default']);
+                $this->_defaults["{$fieldName}_from"] = $field['default']['from'] ?? NULL;
+                $this->_defaults["{$fieldName}_to"] = $field['default']['to'] ?? NULL;
                 $this->_defaults["{$fieldName}_relative"] = 0;
               }
               else {
@@ -957,8 +957,8 @@ class CRM_Report_Form extends CRM_Core_Form {
             }
             else {
               if ((CRM_Utils_Array::value('type', $field) & CRM_Utils_Type::T_INT) && is_array($field['default'])) {
-                $this->_defaults["{$fieldName}_min"] = CRM_Utils_Array::value('min', $field['default']);
-                $this->_defaults["{$fieldName}_max"] = CRM_Utils_Array::value('max', $field['default']);
+                $this->_defaults["{$fieldName}_min"] = $field['default']['min'] ?? NULL;
+                $this->_defaults["{$fieldName}_max"] = $field['default']['max'] ?? NULL;
               }
               $this->_defaults["{$fieldName}_value"] = $field['default'];
             }
@@ -1216,11 +1216,11 @@ class CRM_Report_Form extends CRM_Core_Form {
               $colGroups[$tableName]['use_accordian_for_field_selection'] = TRUE;
             }
 
-            $colGroups[$tableName]['fields'][$fieldName] = CRM_Utils_Array::value('title', $field);
+            $colGroups[$tableName]['fields'][$fieldName] = $field['title'] ?? NULL;
             if ($groupTitle && empty($colGroups[$tableName]['group_title'])) {
               $colGroups[$tableName]['group_title'] = $groupTitle;
             }
-            $options[$fieldName] = CRM_Utils_Array::value('title', $field);
+            $options[$fieldName] = $field['title'] ?? NULL;
           }
         }
       }
@@ -2741,9 +2741,9 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
   public function selectClause(&$tableName, $tableKey, &$fieldName, &$field) {
     if (!empty($field['pseudofield'])) {
       $alias = "{$tableName}_{$fieldName}";
-      $this->_columnHeaders["{$tableName}_{$fieldName}"]['title'] = CRM_Utils_Array::value('title', $field);
-      $this->_columnHeaders["{$tableName}_{$fieldName}"]['type'] = CRM_Utils_Array::value('type', $field);
-      $this->_columnHeaders["{$tableName}_{$fieldName}"]['dbAlias'] = CRM_Utils_Array::value('dbAlias', $field);
+      $this->_columnHeaders["{$tableName}_{$fieldName}"]['title'] = $field['title'] ?? NULL;
+      $this->_columnHeaders["{$tableName}_{$fieldName}"]['type'] = $field['type'] ?? NULL;
+      $this->_columnHeaders["{$tableName}_{$fieldName}"]['dbAlias'] = $field['dbAlias'] ?? NULL;
       $this->_selectAliases[] = $alias;
       return ' 1 as  ' . $alias;
     }
@@ -3031,7 +3031,7 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
 
           // Record any section headers for assignment to the template
           if (!empty($orderBy['section'])) {
-            $orderByField['pageBreak'] = CRM_Utils_Array::value('pageBreak', $orderBy);
+            $orderByField['pageBreak'] = $orderBy['pageBreak'] ?? NULL;
             $this->_sections[$orderByField['tplField']] = $orderByField;
           }
         }
@@ -3326,16 +3326,16 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
             }
           }
           else {
-            $op = CRM_Utils_Array::value("{$fieldName}_op", $this->_params);
+            $op = $this->_params["{$fieldName}_op"] ?? NULL;
             $value = NULL;
             if ($op) {
               $pair = $this->getOperationPair(
                 CRM_Utils_Array::value('operatorType', $field),
                 $fieldName
               );
-              $min = CRM_Utils_Array::value("{$fieldName}_min", $this->_params);
-              $max = CRM_Utils_Array::value("{$fieldName}_max", $this->_params);
-              $val = CRM_Utils_Array::value("{$fieldName}_value", $this->_params);
+              $min = $this->_params["{$fieldName}_min"] ?? NULL;
+              $max = $this->_params["{$fieldName}_max"] ?? NULL;
+              $val = $this->_params["{$fieldName}_value"] ?? NULL;
               if (in_array($op, ['bw', 'nbw']) && ($min || $max)) {
                 $value = "{$pair[$op]} $min " . ts('and') . " $max";
               }
@@ -4656,46 +4656,6 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
   /**
    * Add Address into From Table if required.
    *
-   * @deprecated use joinAddressFromContact
-   * (left here in case extensions use it).
-   */
-  public function addAddressFromClause() {
-    CRM_Core_Error::deprecatedFunctionWarning('CRM_Report_Form::joinAddressFromContact');
-    // include address field if address column is to be included
-    if ((isset($this->_addressField) &&
-        $this->_addressField
-      ) ||
-      $this->isTableSelected('civicrm_address')
-    ) {
-      $this->_from .= "
-                 LEFT JOIN civicrm_address {$this->_aliases['civicrm_address']}
-                           ON ({$this->_aliases['civicrm_contact']}.id =
-                               {$this->_aliases['civicrm_address']}.contact_id) AND
-                               {$this->_aliases['civicrm_address']}.is_primary = 1\n";
-    }
-  }
-
-  /**
-   * Add Phone into From Table if required.
-   *
-   * @deprecated use joinPhoneFromContact
-   *  (left here in case extensions use it).
-   */
-  public function addPhoneFromClause() {
-    CRM_Core_Error::deprecatedFunctionWarning('CRM_Report_Form::joinPhoneFromContact');
-    // include address field if address column is to be included
-    if ($this->isTableSelected('civicrm_phone')) {
-      $this->_from .= "
-      LEFT JOIN civicrm_phone {$this->_aliases['civicrm_phone']}
-      ON ({$this->_aliases['civicrm_contact']}.id =
-      {$this->_aliases['civicrm_phone']}.contact_id) AND
-      {$this->_aliases['civicrm_phone']}.is_primary = 1\n";
-    }
-  }
-
-  /**
-   * Add Address into From Table if required.
-   *
    * Prefix will be added to both tables as
    * it is assumed you are using it to get address of a secondary contact.
    *
@@ -5317,8 +5277,8 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
   protected function addBasicFieldToSelect($tableName, $fieldName, $field, $select) {
     $alias = "{$tableName}_{$fieldName}";
     $select[] = "{$field['dbAlias']} as $alias";
-    $this->_columnHeaders["{$tableName}_{$fieldName}"]['title'] = CRM_Utils_Array::value('title', $field);
-    $this->_columnHeaders["{$tableName}_{$fieldName}"]['type'] = CRM_Utils_Array::value('type', $field);
+    $this->_columnHeaders["{$tableName}_{$fieldName}"]['title'] = $field['title'] ?? NULL;
+    $this->_columnHeaders["{$tableName}_{$fieldName}"]['type'] = $field['type'] ?? NULL;
     $this->_selectAliases[] = $alias;
     return $select;
   }
@@ -5955,7 +5915,7 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
   protected function getSelectClauseWithGroupConcatIfNotGroupedBy($tableName, &$fieldName, &$field) {
     if ($this->groupConcatTested && (!empty($this->_groupByArray) || $this->isForceGroupBy)) {
       if ((empty($field['statistics']) || in_array('GROUP_CONCAT', $field['statistics']))) {
-        $label = CRM_Utils_Array::value('title', $field);
+        $label = $field['title'] ?? NULL;
         $alias = $field['tplField'] ?? "{$tableName}_{$fieldName}";
         $this->_columnHeaders["{$tableName}_{$fieldName}"]['title'] = $label;
         $this->_selectAliases[] = $alias;
@@ -5983,24 +5943,24 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
       if (CRM_Utils_Array::value('operatorType', $field) ==
         CRM_Report_Form::OP_MONTH
       ) {
-        $op = CRM_Utils_Array::value("{$fieldName}_op", $this->_params);
-        $value = CRM_Utils_Array::value("{$fieldName}_value", $this->_params);
+        $op = $this->_params["{$fieldName}_op"] ?? NULL;
+        $value = $this->_params["{$fieldName}_value"] ?? NULL;
         if (is_array($value) && !empty($value)) {
           return "(month({$field['dbAlias']}) $op (" . implode(', ', $value) .
             '))';
         }
       }
       else {
-        $relative = CRM_Utils_Array::value("{$fieldName}_relative", $this->_params);
-        $from = CRM_Utils_Array::value("{$fieldName}_from", $this->_params);
-        $to = CRM_Utils_Array::value("{$fieldName}_to", $this->_params);
-        $fromTime = CRM_Utils_Array::value("{$fieldName}_from_time", $this->_params);
-        $toTime = CRM_Utils_Array::value("{$fieldName}_to_time", $this->_params);
+        $relative = $this->_params["{$fieldName}_relative"] ?? NULL;
+        $from = $this->_params["{$fieldName}_from"] ?? NULL;
+        $to = $this->_params["{$fieldName}_to"] ?? NULL;
+        $fromTime = $this->_params["{$fieldName}_from_time"] ?? NULL;
+        $toTime = $this->_params["{$fieldName}_to_time"] ?? NULL;
         return $this->dateClause($field['dbAlias'], $relative, $from, $to, $field['type'], $fromTime, $toTime);
       }
     }
     else {
-      $op = CRM_Utils_Array::value("{$fieldName}_op", $this->_params);
+      $op = $this->_params["{$fieldName}_op"] ?? NULL;
       if ($op) {
         return $this->whereClause($field,
           $op,

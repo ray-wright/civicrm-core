@@ -1,4 +1,5 @@
 <?php
+
 /*
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC. All rights reserved.                        |
@@ -12,21 +13,27 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  * $Id$
  *
  */
 
+
+namespace api\v4\Action;
+
+use Civi\Api4\Contact;
+use api\v4\UnitTestCase;
+
 /**
- * Formats an array of attributes as html
- *
- * @param array $params
- *   ['a'] array of attributes.
- * @param CRM_Core_Smarty $smarty
- *
- * @return string
+ * @group headless
  */
-function smarty_function_crmAttributes($params, &$smarty) {
-  $attributes = $params['a'] ?? [];
-  return CRM_Utils_String::htmlAttributes($attributes);
+class ResultTest extends UnitTestCase {
+
+  public function testJsonSerialize() {
+    $result = Contact::getFields()->setCheckPermissions(FALSE)->setIncludeCustom(FALSE)->execute();
+    $json = json_encode($result);
+    $this->assertStringStartsWith('[{"', $json);
+    $this->assertTrue(is_array(json_decode($json)));
+  }
+
 }

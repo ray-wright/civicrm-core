@@ -569,10 +569,10 @@ class CRM_Utils_Array {
       $node = &$result;
       foreach ($keys as $key) {
         if (is_array($record)) {
-          $keyvalue = isset($record[$key]) ? $record[$key] : NULL;
+          $keyvalue = $record[$key] ?? NULL;
         }
         else {
-          $keyvalue = isset($record->{$key}) ? $record->{$key} : NULL;
+          $keyvalue = $record->{$key} ?? NULL;
         }
         if (isset($node[$keyvalue]) && !is_array($node[$keyvalue])) {
           $node[$keyvalue] = [];
@@ -915,7 +915,7 @@ class CRM_Utils_Array {
     foreach ($matrix as $pos => $oldRow) {
       $newRow = [];
       foreach ($columns as $column) {
-        $newRow[$column] = CRM_Utils_Array::value($column, $oldRow);
+        $newRow[$column] = $oldRow[$column] ?? NULL;
       }
       $newRows[$pos] = $newRow;
     }

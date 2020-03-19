@@ -184,7 +184,7 @@ LIMIT 1;";
    */
   public static function getRefundTransactionTrxnID($contributionID) {
     $ids = self::getRefundTransactionIDs($contributionID);
-    return isset($ids['trxn_id']) ? $ids['trxn_id'] : NULL;
+    return $ids['trxn_id'] ?? NULL;
   }
 
   /**
@@ -392,7 +392,7 @@ WHERE ceft.entity_id = %1";
     if (!$amount) {
       return FALSE;
     }
-    $contributionId = isset($params['contribution']->id) ? $params['contribution']->id : $params['contribution_id'];
+    $contributionId = $params['contribution']->id ?? $params['contribution_id'];
     if (empty($params['financial_type_id'])) {
       $financialTypeId = CRM_Core_DAO::getFieldValue('CRM_Contribute_DAO_Contribution', $contributionId, 'financial_type_id', 'id');
     }
@@ -667,7 +667,7 @@ WHERE ceft.entity_id = %1";
     }
 
     $financialTrxn = $financialTrxn['values'][$financialTrxn['id']];
-    $paymentProcessorID = CRM_Utils_Array::value('financial_trxn_id.payment_processor_id', $financialTrxn);
+    $paymentProcessorID = $financialTrxn['financial_trxn_id.payment_processor_id'] ?? NULL;
 
     if ($paymentProcessorID) {
       return NULL;
@@ -696,7 +696,7 @@ WHERE ceft.entity_id = %1";
     // ensure that there are all the information in updated contribution object identified by $currentContribution
     $currentContribution->find(TRUE);
 
-    $deferredFinancialAccount = CRM_Utils_Array::value('deferred_financial_account_id', $inputParams);
+    $deferredFinancialAccount = $inputParams['deferred_financial_account_id'] ?? NULL;
     if (empty($deferredFinancialAccount)) {
       $deferredFinancialAccount = CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($prevContribution->financial_type_id, 'Deferred Revenue Account is');
     }

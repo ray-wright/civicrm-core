@@ -30,7 +30,7 @@ class CRM_ACL_BAO_ACL extends CRM_ACL_DAO_ACL {
 
   /**
    * Get ACL entity table.
-   *
+   * @deprecated
    * @return array|null
    */
   public static function entityTable() {
@@ -46,6 +46,7 @@ class CRM_ACL_BAO_ACL extends CRM_ACL_DAO_ACL {
 
   /**
    * @return array|null
+   * @deprecated
    */
   public static function objectTable() {
     CRM_Core_Error::deprecatedFunctionWarning('unused function to be removed');
@@ -88,6 +89,7 @@ class CRM_ACL_BAO_ACL extends CRM_ACL_DAO_ACL {
    *   The ID of the object.
    * @param array $tables
    *   Tables that will be needed in the FROM.
+   * @deprecated
    *
    * @return string|null
    *   WHERE-style clause to filter results,
@@ -423,7 +425,7 @@ SELECT count( a.id )
     $params = [1 => [$str, 'String']];
 
     $count = CRM_Core_DAO::singleValueQuery($query, $params);
-    return ($count) ? TRUE : FALSE;
+    return (bool) $count;
   }
 
   /**
